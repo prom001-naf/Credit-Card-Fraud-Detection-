@@ -1,67 +1,74 @@
-# Credit Card Fraud Detection Dashboard
+# Credit Card Fraud Detection
 
-This project provides a web-based dashboard for analyzing credit card transactions and detecting fraud. It integrates data analysis via Plotly, geospatial visualization using Folium, and machine learning predictions using a pre-trained model.
-
-## Project Structure
-
-- **.gitignore**  
-  Specifies files and directories to ignore in version control.
-
-- **credit-card-transactions-dataset.zip**  
-  Compressed dataset downloaded and extracted in the **Data/** folder.
-
-- **Data/**  
-  Contains the extracted dataset file: `credit_card_transactions.csv`.
-
-- **FraudDetection_Colab.ipynb**  
-  A Jupyter Notebook demonstrating EDA and model evaluation approaches.
-
-- **README.md**  
-  This file.
-
-- **UI/**  
-  Contains application source files:
-  - [`app.py`](UI/app.py): The Flask backend that serves the dashboard.
-  - `city_population.json`: JSON file with population data used in predictions.
-  - `credit_card_transactions.csv`: A copy of the transactions data (if needed).
-  - `fraud_model.joblib`: The pre-trained machine learning model.
-  
-  - **UI/static/**  
-    Contains downloadable files:
-    - `files/analysis_notebook.ipynb`: Jupyter notebook for analysis.
-    - `files/fraud_model.joblib`: Exported fraud detection model file.
-    - `files/training_notebook.ipynb`: Jupyter notebook used to train the model.
-    
-  - **UI/templates/**  
-    Contains HTML templates:
-    - [`dashboard.html`](UI/templates/dashboard.html): The main dashboard view.
+## Overview
+This project focuses on detecting fraudulent credit card transactions using machine learning techniques. The goal is to develop a model that can accurately distinguish between legitimate and fraudulent transactions, helping financial institutions mitigate fraud.
 
 ## Features
+- **Machine Learning Model**: Trained using real-world credit card transaction data.
+- **Jupyter Notebook**: For data analysis, model training, and evaluation.
+- **Web Interface**: A simple UI to test and visualize predictions.
+- **Pre-trained Model**: A trained model saved as `fraud_model.joblib` for quick deployment.
+- **Dataset**: Includes `credit_card_transactions.csv` for model training and testing.
 
-- **Data Analysis Visualizations**  
-  Line charts, box plots, and histograms created with Plotly to visualize trends in fraudulent activities and demographic distributions.
+## Project Structure
+```
+Credit-Card-Fraud-Detection/
+│-- FraudDetection_Colab.ipynb    # Jupyter Notebook for analysis and training
+│-- UI/
+│   ├── app.py                   # Main script for UI
+│   ├── credit_card_transactions.csv  # Transaction dataset
+│   ├── fraud_model.joblib        # Trained model file
+│   ├── static/                   # Static assets
+│   ├── templates/                # HTML templates for the UI
+│-- README.md                     # Project documentation
+│-- .gitignore                     # Git ignore rules
+```
 
-- **Geospatial Visualizations**  
-  Interactive maps using Folium to display locations of fraudulent transactions.
+## Installation & Setup
+### Prerequisites
+Ensure you have Python installed along with the required libraries.
 
-- **Fraud Prediction**  
-  A machine learning model (RandomForestClassifier) that predicts the likelihood of a transaction being fraudulent.
-
-## Requirements
-
-- Python 3.x
-- Flask
-- Pandas
-- Plotly
-- Folium
-- Joblib
-- NumPy
-- Other dependencies may be installed using `pip`
-
-## Setup and Installation
-
-1. **Clone the Repository**
-
+### Steps
+1. **Clone the repository:**
    ```sh
-   git clone <repository_url>
-   cd Credit-Card-Fraud-Detection-
+   git clone https://github.com/your-repo/credit-card-fraud-detection.git
+   cd credit-card-fraud-detection
+   ```
+
+2. **Install dependencies:**
+   ```sh
+   pip install -r requirements.txt
+   ```
+
+3. **Run Jupyter Notebook (optional for model training):**
+   ```sh
+   jupyter notebook FraudDetection_Colab.ipynb
+   ```
+
+4. **Run the web application:**
+   ```sh
+   python UI/app.py
+   ```
+
+## Usage
+- **Model Training:** The Jupyter Notebook `FraudDetection_Colab.ipynb` can be used to train and evaluate different machine learning models.
+- **Web Interface:** The UI allows users to input transaction details and get fraud detection predictions.
+- **Pre-trained Model:** The saved `fraud_model.joblib` can be used for quick inference without retraining.
+
+## Technologies Used
+- **Python** (Pandas, NumPy, Scikit-learn, Joblib, Flask)
+- **Jupyter Notebook** for data analysis
+- **Flask** for the web interface
+
+## Future Improvements
+- Deploy the model as a REST API.
+- Improve feature engineering for better accuracy.
+- Implement real-time fraud detection with streaming data.
+
+## Contributing
+Feel free to fork the repository and submit pull requests with improvements or new features.
+
+## License
+This project is licensed under the MIT License.
+
+
