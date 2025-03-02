@@ -1,3 +1,5 @@
+import os
+import zipfile
 import pandas as pd
 from flask import Flask, render_template, request, jsonify
 import plotly.express as px
@@ -7,11 +9,33 @@ import numpy as np
 import json
 from datetime import datetime
 
+# --- Download Dataset from Kaggle if not already present ---
+csv_file = "credit_card_transactions.csv"
+save_path = "Data"
+
+if not os.path.exists(csv_file):
+    # Install Kaggle
+    os.system("pip3 install kaggle --user")
+
+    # Download the dataset
+    os.system("kaggle datasets download -d priyamchoksi/credit-card-transactions-dataset")
+
+    # Unzip the dataset into the "Data" folder
+    os.makedirs(save_path, exist_ok=True)
+    os.system(f"unzip credit-card-transactions-dataset.zip -d {save_path}")
+
+    # Check if the file was saved successfully
+    extracted_file_path = os.path.join(save_path, csv_file)
+    if os.path.exists(extracted_file_path):
+        print(f"✅ Dataset successfully saved in: {extracted_file_path}")
+        csv_file = extracted_file_path  # Update the path for loading
+    else:
+        raise FileNotFoundError("❌ Failed to save the dataset.")
+
 app = Flask(__name__)
 
 # --- Data Preparation ---
-file_name = "credit_card_transactions.csv"
-df = pd.read_csv(file_name, parse_dates=["trans_date_trans_time", "dob"])
+df = pd.read_csv(csv_file, parse_dates=["trans_date_trans_time", "dob"])
 df["is_fraud"] = df["is_fraud"].astype(int)
 df["month"] = df["trans_date_trans_time"].dt.to_period("M").astype(str)
 df["age"] = (df["trans_date_trans_time"] - df["dob"]).dt.days // 365
@@ -53,11 +77,11 @@ def create_folium_map():
 folium_map = create_folium_map()
 
 # --- Load City Population Data ---
-with open("city_population.json", "r") as f:
+with open("UI/city_population.json", "r") as f:
     city_population_dict = json.load(f)
 
 # --- Load Model ---
-model = joblib.load("fraud_model.joblib")
+model = joblib.load("UI/fraud_model.joblib")
 
 # --- Flask Routes ---
 @app.route("/")
