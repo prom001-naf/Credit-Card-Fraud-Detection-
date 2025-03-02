@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Interactive Fraud Dashboard</title>
+  
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  
+  <!-- Font Awesome for Icons -->
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    rel="stylesheet"
+  />
+  
+  <!-- Google Font: Roboto -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
+    rel="stylesheet"
+  />
+  
+  <style>
+    /* Body and Font */
+    body {
+      background: linear-gradient(to right, #f0f2f5, #ffffff);
+      font-family: "Roboto", sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    
+    /* Navbar Gradient */
+    .navbar {
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+    }
+    
+    /* Main Container */
+    .main-container {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+      margin-bottom: 40px;
+    }
+
+    /* Nav Tabs */
+    .nav-tabs {
+      margin-top: 20px;
+      border-bottom: 2px solid #dee2e6;
+    }
+    .nav-link {
+      color: #495057;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .nav-link:hover {
+      color: #0d6efd;
+      background-color: #e9ecef;
+    }
+    .nav-link.active {
+      color: #0d6efd !important;
+      background-color: #e9ecef !important;
+      border-color: #dee2e6 #dee2e6 #fff;
+    }
+    
+    /* Chart Container */
+    .chart-container {
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      margin-bottom: 1.5rem;
+    }
+
+    /* Force Folium's map (iframe) to respect the container size */
+    .chart-container.folium-map {
+      position: relative;
+      width: 100%;
+      height: 500px; /* Adjust as needed */
+      overflow: hidden;
+    }
+    .chart-container.folium-map iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100% !important;
+      height: 100% !important;
+      border: none;
+    }
+    
+    /* Chart Explanations */
+    .chart-explanation {
+      font-size: 0.9em;
+      color: #6c757d;
+      margin-top: 8px;
+    }
+    
+    /* Prediction Result Box */
+    #prediction-result {
+      margin-top: 20px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #e9ecef;
+    }
+    
+    /* Footer */
+    footer {
+      background: #2c5364;
+      color: #fff;
+      padding: 15px 0;
+    }
+    footer p {
+      margin: 0;
+    }
+
+    /* Responsive Tweaks */
+    @media (max-width: 768px) {
+      .main-container {
+        padding: 10px;
+        margin-top: 10px;
+      }
+      .chart-container {
+        margin-bottom: 20px;
+      }
+      .nav-tabs {
+        margin-top: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <!-- Top Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid px-4">
+      <a class="navbar-brand fw-bold" href="#">
+        <i class="fas fa-credit-card"></i> Fraud Dashboard 2025
+      </a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarContent"
+        aria-controls="navbarContent"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarContent">
+        <!-- You could add more nav items or links here if desired -->
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <!-- Example: Home link, About link, etc.
+          <li class="nav-item">
+            <a class="nav-link" href="#">About</a>
+          </li>
+          -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+  
+  <!-- Main Content Container -->
+  <div class="container main-container">
+    
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs" id="dashboardTabs">
+      <li class="nav-item">
+        <a class="nav-link active" data-bs-toggle="tab" href="#data-analysis">
+          <i class="fas fa-chart-line"></i> Data Analysis
+        </a>
+      </li>
+      <!-- <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#model-test">
+          <i class="fas fa-vial"></i> Model Test & Prediction
+        </a> -->
+      <!-- </li> -->
+      <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#model-eval">
+          <i class="fas fa-balance-scale"></i> Model Evaluation
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#downloads">
+          <i class="fas fa-download"></i> Downloads
+        </a>
+      </li>
+      <!-- New Developers Tab -->
+      <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#developers">
+          <i class="fas fa-users"></i> Developers
+        </a>
+      </li>
+    </ul>
+    
+    <!-- Tab Content -->
+    <div class="tab-content mt-4">
+      
+      <!-- Data Analysis Tab with 2x2 Grid Layout and Graph Explanations -->
+      <div class="tab-pane fade show active" id="data-analysis">
+        <div class="row">
+          <!-- Fraud Trend Analysis -->
+          <div class="col-md-6">
+            <div class="chart-container">
+              {{ trend_chart | safe }}
+              <p class="chart-explanation">
+                This line chart shows the trend of fraudulent transactions over time,
+                highlighting peaks and declines to help identify seasonal or temporal patterns.
+              </p>
+            </div>
+          </div>
+          <!-- Age Distribution -->
+          <div class="col-md-6">
+            <div class="chart-container">
+              {{ age_box_chart | safe }}
+              <p class="chart-explanation">
+                This box plot displays the age distribution of transactions based on fraud status.
+                It helps in understanding if certain age groups are more prone to fraud.
+              </p>
+            </div>
+          </div>
+          <!-- Fraud Cases by Gender -->
+          <div class="col-md-6">
+            <div class="chart-container">
+              {{ gender_count_chart | safe }}
+              <p class="chart-explanation">
+                The histogram compares the count of fraud cases by gender,
+                allowing you to see the volume of fraudulent activities across different groups.
+              </p>
+            </div>
+          </div>
+          <!-- Fraud Rate by Gender -->
+          <div class="col-md-6">
+            <div class="chart-container">
+              {{ gender_rate_chart | safe }}
+              <p class="chart-explanation">
+                This bar chart illustrates the fraud rate (in percentage) by gender,
+                providing insights into the relative risk associated with each group.
+              </p>
+            </div>
+          </div>
+          <!-- Folium Map (Full Width) -->
+          <div class="col-12">
+            <div class="chart-container folium-map">
+              {{ folium_map | safe }}
+            </div>
+            <p class="chart-explanation">
+              The interactive map displays the geographic locations of fraudulent transactions.
+              Click on the markers for details about the city and state.
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Model Test & Prediction Tab
+      <div class="tab-pane fade" id="model-test">
+        <h3 class="chart-title">Model Testing & Prediction</h3>
+        <p>Include interactive model testing results and predictions here.</p>
+      </div> -->
+      
+      <!-- Model Evaluation Tab with Enhanced Form -->
+      <div class="tab-pane fade" id="model-eval">
+        <h3 class="chart-title">Model Evaluation</h3>
+        <form id="prediction-form">
+          <div class="mb-3">
+            <label for="amt" class="form-label">
+              <i class="fas fa-money-bill-wave"></i> Transaction Amount
+            </label>
+            <input
+              type="number"
+              step="any"
+              class="form-control"
+              id="amt"
+              name="amt"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="transaction_datetime" class="form-label">
+              <i class="fas fa-calendar-alt"></i> Transaction Date & Time
+            </label>
+            <input
+              type="datetime-local"
+              class="form-control"
+              id="transaction_datetime"
+              name="transaction_datetime"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="city" class="form-label">
+              <i class="fas fa-city"></i> City
+            </label>
+            <select class="form-select" id="city" name="city" required>
+              <option value="">--Select City--</option>
+              {% for city in cities %}
+              <option value="{{ city }}">{{ city }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="selected_category" class="form-label">
+              <i class="fas fa-list"></i> Transaction Category
+            </label>
+            <select
+              class="form-select"
+              id="selected_category"
+              name="selected_category"
+              required
+            >
+              <option value="">--Select Category--</option>
+              <option value="category_entertainment">Entertainment</option>
+              <option value="category_food_dining">Food Dining</option>
+              <option value="category_gas_transport">Gas Transport</option>
+              <option value="category_grocery_net">Grocery Net</option>
+              <option value="category_grocery_pos">Grocery POS</option>
+              <option value="category_health_fitness">Health Fitness</option>
+              <option value="category_home">Home</option>
+              <option value="category_kids_pets">Kids Pets</option>
+              <option value="category_misc_net">Misc Net</option>
+              <option value="category_misc_pos">Misc POS</option>
+              <option value="category_personal_care">Personal Care</option>
+              <option value="category_shopping_net">Shopping Net</option>
+              <option value="category_shopping_pos">Shopping POS</option>
+              <option value="category_travel">Travel</option>
+            </select>
+          </div>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            aria-label="Predict Fraud"
+          >
+            Predict
+          </button>
+        </form>
+        <div id="prediction-result" class="mt-3" style="display: none;"></div>
+      </div>
+
+      <!-- Downloads Tab -->
+      <div class="tab-pane fade" id="downloads">
+        <h3 class="chart-title">Downloads</h3>
+        <p>Below are files that you can download for your reference.</p>
+
+        <!-- Cards layout for files -->
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+          <!-- Model File -->
+          <div class="col">
+            <div class="card h-100">
+              <div class="card-body">
+                <h5 class="card-title">
+                  <i class="fas fa-file"></i> Fraud Model (fraud_model.joblib)
+                </h5>
+                <p class="card-text">
+                  This is the trained model for fraud detection. Download for local inference or further analysis.
+                </p>
+                <a
+                  href="{{ url_for('static', filename='files/fraud_model.joblib') }}"
+                  class="btn btn-primary"
+                  download
+                >
+                  <i class="fas fa-download"></i> Download
+                </a>
+              </div>
+            </div>
+          </div>
+          <!-- Training Notebook -->
+          <div class="col">
+            <div class="card h-100">
+              <div class="card-body">
+                <h5 class="card-title">
+                  <i class="fas fa-file-code"></i> Training Notebook
+                </h5>
+                <p class="card-text">
+                  The Jupyter notebook containing the code used to train the fraud detection model.
+                </p>
+                <a
+                  href="{{ url_for('static', filename='files/training_notebook.ipynb') }}"
+                  class="btn btn-primary"
+                  download
+                >
+                  <i class="fas fa-download"></i> Download
+                </a>
+              </div>
+            </div>
+          </div>
+          <!-- Analysis Notebook -->
+          <div class="col">
+            <div class="card h-100">
+              <div class="card-body">
+                <h5 class="card-title">
+                  <i class="fas fa-file-alt"></i> Analysis Notebook
+                </h5>
+                <p class="card-text">
+                  This Jupyter notebook provides exploratory data analysis and visualizations.
+                </p>
+                <a
+                  href="{{ url_for('static', filename='files/analysis_notebook.ipynb') }}"
+                  class="btn btn-primary"
+                  download
+                >
+                  <i class="fas fa-download"></i> Download
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Developers Tab -->
+      <div class="tab-pane fade" id="developers">
+        <h3 class="chart-title">Meet the Developers</h3>
+        <p>Our amazing team behind the scenes.</p>
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+          
+          <!-- Example Developer Card #1 -->
+          <div class="col">
+            <div class="card h-100">
+              <div class="card-body">
+                <h5 class="card-title">Krinal Patel</h5>
+                <a
+                  href="https://github.com/krinal2910"
+                  class="btn btn-dark me-2"
+                  target="_blank"
+                >
+                  <i class="fab fa-github"></i> GitHub
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Example Developer Card #1 -->
+          <div class="col">
+            <div class="card h-100">
+              <div class="card-body">
+                <h5 class="card-title">Nafis</h5>
+                <a
+                  href="https://github.com/prom001-naf"
+                  class="btn btn-dark me-2"
+                  target="_blank"
+                >
+                  <i class="fab fa-github"></i> GitHub
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Example Developer Card #2 -->
+          <div class="col">
+            <div class="card h-100">
+              <div class="card-body">
+                <h5 class="card-title">Christine</h5>
+                <a
+                  href="https://github.com/cbilinski101"
+                  class="btn btn-dark me-2"
+                  target="_blank"
+                >
+                  <i class="fab fa-github"></i> GitHub
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+  <!-- Footer -->
+  <footer class="text-center mt-4">
+    <div class="container">
+      <div class="border p-3">
+        <p class="mb-0">
+          © 2025 Fraud Detection. All rights reserved.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  
+  <!-- Bootstrap JS and Dependencies -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+  ></script>
+  
+  <!-- jQuery for AJAX Requests -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  
+  <!-- Custom JS for Form Handling -->
+  <script>
+    $(document).ready(function () {
+      $("#prediction-form").submit(function (event) {
+        event.preventDefault();
+        var formData = $(this).serialize();
+        $.post("/predict", formData, function (data) {
+          if (data.error) {
+            $("#prediction-result")
+              .html("<div class='alert alert-danger'>" + data.error + "</div>")
+              .show();
+          } else {
+            $("#prediction-result")
+              .html(
+                "<div class='alert alert-info'><strong>Probability:</strong> " +
+                  data.probability +
+                  "<br><strong>Classification:</strong> " +
+                  data.classification +
+                  "</div>"
+              )
+              .show();
+          }
+        });
+      });
+
+      // Simple validation feedback
+      $("#amt").on("input", function () {
+        var value = $(this).val();
+        if (value <= 0) {
+          $(this).addClass("is-invalid").removeClass("is-valid");
+        } else {
+          $(this).addClass("is-valid").removeClass("is-invalid");
+        }
+      });
+
+      $("#transaction_datetime").on("input", function () {
+        if (!$(this).val()) {
+          $(this).addClass("is-invalid").removeClass("is-valid");
+        } else {
+          $(this).addClass("is-valid").removeClass("is-invalid");
+        }
+      });
+
+      $("#city, #selected_category").change(function () {
+        if (!$(this).val()) {
+          $(this).addClass("is-invalid").removeClass("is-valid");
+        } else {
+          $(this).addClass("is-valid").removeClass("is-invalid");
+        }
+      });
+    });
+  </script>
+</body>
+</html>
